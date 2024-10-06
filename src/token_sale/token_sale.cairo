@@ -1,6 +1,5 @@
 #[starknet::contract]
 mod TokenSale {
-    use core::num::traits::Zero;
     use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
     use openzeppelin::access::ownable::OwnableComponent;
     use starknet::{ContractAddress, get_caller_address};
@@ -46,9 +45,12 @@ mod TokenSale {
     #[abi(embed_v0)]
     impl TokenSaleImpl of ITokenSale<ContractState> {
         fn mint(ref self: ContractState, amount: u256) {
+            self.ownable.assert_only_owner();
             let caller = get_caller_address();
-            assert(caller.is_non_zero(), 'Zero address caller');
 
+            // commented out because self.ownable.assert_only_owner() already checks for zero address caller
+            // assert(caller.is_non_zero(), 'Zero address caller');
+            
             self.erc20.mint(caller, amount);
         }
     }
